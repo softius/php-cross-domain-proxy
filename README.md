@@ -20,7 +20,18 @@ $('#target').load(
 );
 ```
 
-It’s worth mentioning that both POST and GET methods work and headers are taken into consideration. That is to say, headers sent from browser to proxy are used in the cross domain request and vice versa. 
+It’s worth mentioning that both POST and GET methods work and headers are taken into consideration. That is to say, headers sent from browser to proxy are used in the cross domain request and vice versa.
+
+You can also specify the URL with the `X-Proxy-URL` header, which might be easier to set with your JavaScript library. For example, if you wanted to automatically use the proxy for external URL targets, for GET and POST requests:
+
+``` JAVASCRIPT
+$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+	if (options.url.match(/^https?:/)) {
+		options.headers['X-Proxy-URL'] = options.url;
+		options.url = '/proxy.php';
+	}
+});
+```
 
 Configuration
 --------------

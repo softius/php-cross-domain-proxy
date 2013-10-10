@@ -40,7 +40,7 @@ foreach ( $_SERVER as $key => $value ) {
 	if ( substr( $key, 0, 5 ) == 'HTTP_' ) {
 		$headername = str_replace( '_', ' ', substr( $key, 5 ) );
 		$headername = str_replace( ' ', '-', ucwords( strtolower( $headername ) ) );
-		if ( 'Host' != $headername ) {
+		if ( !in_array( $headername, array( 'Host', 'X-Proxy-Url' ) ) ) {
 			$request_headers[] = "$headername: $value";
 		}
 	}
@@ -49,7 +49,8 @@ foreach ( $_SERVER as $key => $value ) {
 // identify request method, url and params
 $request_method = $_SERVER['REQUEST_METHOD'];
 $request_params = ( $request_method == 'GET' ) ? $_GET : $_POST;
-$request_url = urldecode( $_REQUEST['csurl'] );
+// Get URL from `csurl` in GET or POST data, before falling back to X-Proxy-URL header.
+$request_url = urldecode( isset( $_REQUEST['csurl'] ) ? $_REQUEST['csurl'] : $_SERVER['HTTP_X_PROXY_URL'] );
 $p_request_url = parse_url( $request_url );
 unset( $request_params['csurl'] );
 
@@ -105,9 +106,16 @@ list($response_headers, $response_content) = preg_split( '/(\r\n){2}/', $respons
 
 // (re-)send the headers
 $response_headers = preg_split( '/(\r\n){1}/', $response_headers );
-foreach ( $response_headers as $key => $response_header )
-	if ( !preg_match( '/^(Transfer-Encoding):/', $response_header ) )
+foreach ( $response_headers as $key => $response_header ) {
+	// Rewrite the `Location` header, so clients will also use the proxy for redirects.
+	if ( preg_match( '/^Location:/', $response_header ) ) {
+		list($header, $value) = preg_split( '/: /', $response_header, 2 );
+		$response_header = 'Location: ' . $_SERVER['REQUEST_URI'] . '?csurl=' . $value;
+	}
+	if ( !preg_match( '/^(Transfer-Encoding):/', $response_header ) ) {
 		header( $response_header );
+	}
+}
 
 // finally, output the content
 print($response_content );
