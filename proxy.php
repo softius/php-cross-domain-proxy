@@ -1,7 +1,7 @@
 <?php
 
 /**
- * AJAX Cross Domain (PHP) Proxy 0.7
+ * AJAX Cross Domain (PHP) Proxy 0.8
  *    by Iacovos Constantinou (http://www.iacons.net)
  * 
  * Released under CC-GNU GPL
@@ -48,11 +48,22 @@ foreach ( $_SERVER as $key => $value ) {
 
 // identify request method, url and params
 $request_method = $_SERVER['REQUEST_METHOD'];
-$request_params = ( $request_method == 'GET' ) ? $_GET : $_POST;
+if ( 'GET' == $request_method ) {
+	$request_params = $_GET;
+} elseif ( 'POST' == $request_method ) {
+	$request_params = $_POST;
+} elseif ( 'PUT' == $request_method || 'DELETE' == $request_method ) {
+	$request_params = file_get_contents( 'php://input' );
+} else {
+	$request_params = null;
+}
 // Get URL from `csurl` in GET or POST data, before falling back to X-Proxy-URL header.
-$request_url = urldecode( isset( $_REQUEST['csurl'] ) ? $_REQUEST['csurl'] : $_SERVER['HTTP_X_PROXY_URL'] );
+$request_url = isset( $_REQUEST['csurl'] ) ? urldecode( $_REQUEST['csurl'] ) : urldecode( $_SERVER['HTTP_X_PROXY_URL'] );
 $p_request_url = parse_url( $request_url );
-unset( $request_params['csurl'] );
+
+// csurl may exist in GET request methods
+if ( is_array( $request_params ) && array_key_exists('csurl', $request_params ) )
+	unset( $request_params['csurl'] );
 
 // ignore requests for proxy :)
 if ( preg_match( '!' . $_SERVER['SCRIPT_NAME'] . '!', $request_url ) || empty( $request_url ) || count( $p_request_url ) == 1 ) {
@@ -91,10 +102,13 @@ $ch = curl_init( $request_url );
 curl_setopt( $ch, CURLOPT_HTTPHEADER, $request_headers );   // (re-)send headers
 curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );	 // return response
 curl_setopt( $ch, CURLOPT_HEADER, true );	   // enabled response headers
-// add post data for POST requests
-if ( $request_method == 'POST' ) {
+// add data for POST, PUT or DELETE requests
+if ( 'POST' == $request_method ) {
 	curl_setopt( $ch, CURLOPT_POST, true );
 	curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $request_params ) );
+} elseif ( 'PUT' == $request_method || 'DELETE' == $request_method ) {
+	curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $request_method );
+	curl_setopt( $ch, CURLOPT_POSTFIELDS, $request_params );
 }
 
 // retrieve response (headers and content)
@@ -118,7 +132,7 @@ foreach ( $response_headers as $key => $response_header ) {
 }
 
 // finally, output the content
-print($response_content );
+print( $response_content );
 
 function csajax_debug_message( $message )
 {
