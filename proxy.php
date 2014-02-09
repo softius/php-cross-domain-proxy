@@ -52,6 +52,12 @@ if ( 'GET' == $request_method ) {
 	$request_params = $_GET;
 } elseif ( 'POST' == $request_method ) {
 	$request_params = $_POST;
+	if ( empty( $request_params ) ) {
+		$data = file_get_contents( 'php://input' );
+		if ( !empty( $data ) ) {
+			$request_params = $data;
+		}
+	}
 } elseif ( 'PUT' == $request_method || 'DELETE' == $request_method ) {
 	$request_params = file_get_contents( 'php://input' );
 } else {
@@ -104,8 +110,9 @@ curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );	 // return response
 curl_setopt( $ch, CURLOPT_HEADER, true );	   // enabled response headers
 // add data for POST, PUT or DELETE requests
 if ( 'POST' == $request_method ) {
+	$post_data = is_array( $request_params ) ? http_build_query( $request_params ) : $request_params;
 	curl_setopt( $ch, CURLOPT_POST, true );
-	curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $request_params ) );
+	curl_setopt( $ch, CURLOPT_POSTFIELDS,  $post_data );
 } elseif ( 'PUT' == $request_method || 'DELETE' == $request_method ) {
 	curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $request_method );
 	curl_setopt( $ch, CURLOPT_POSTFIELDS, $request_params );
