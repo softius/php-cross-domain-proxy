@@ -55,7 +55,8 @@ if ( 'GET' == $request_method ) {
 	if ( empty( $request_params ) ) {
 		$data = file_get_contents( 'php://input' );
 		if ( !empty( $data ) ) {
-			$request_params = $data;
+			$request_params = json_decode($data,true)?json_decode($data,true):$data;
+			
 		}
 	}
 } elseif ( 'PUT' == $request_method || 'DELETE' == $request_method ) {
@@ -64,7 +65,7 @@ if ( 'GET' == $request_method ) {
 	$request_params = null;
 }
 // Get URL from `csurl` in GET or POST data, before falling back to X-Proxy-URL header.
-$request_url = isset( $_REQUEST['csurl'] ) ? urldecode( $_REQUEST['csurl'] ) : urldecode( $_SERVER['HTTP_X_PROXY_URL'] );
+$request_url = isset( $request_params['csurl'] ) ? urldecode( $request_params['csurl'] ) : urldecode( $_SERVER['HTTP_X_PROXY_URL'] );
 $p_request_url = parse_url( $request_url );
 
 // csurl may exist in GET request methods
