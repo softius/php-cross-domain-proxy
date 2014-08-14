@@ -64,7 +64,22 @@ if ( 'GET' == $request_method ) {
 	$request_params = null;
 }
 // Get URL from `csurl` in GET or POST data, before falling back to X-Proxy-URL header.
-$request_url = isset( $_REQUEST['csurl'] ) ? urldecode( $_REQUEST['csurl'] ) : urldecode( $_SERVER['HTTP_X_PROXY_URL'] );
+if ( isset( $_REQUEST['csurl'] ) ) {
+    $request_url = urldecode( $_REQUEST['csurl'] );
+} else if ( isset( $_REQUEST['csurl'] ) ) {
+    $request_url = urldecode( $_REQUEST['csurl'] );
+}
+else if ( isset( $_SERVER['HTTP_X_PROXY_URL'] ) )
+{
+    $request_url = urldecode( $_SERVER['HTTP_X_PROXY_URL'] );
+}
+else
+{
+    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
+    header("Status: 404 Not Found");
+    $_SERVER['REDIRECT_STATUS'] = 404;
+    exit;
+}
 $p_request_url = parse_url( $request_url );
 
 // csurl may exist in GET request methods
