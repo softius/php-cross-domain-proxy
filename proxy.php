@@ -37,8 +37,8 @@ $valid_requests = array(
 // identify request headers
 $request_headers = array( );
 foreach ( $_SERVER as $key => $value ) {
-	if ( in_array( substr( $key, 0, 5 ), array('HTTP_', 'CONTE') ) ) {
-		$headername = str_replace( '_', ' ', substr( $key, 5 ) );
+	if ( strpos($key, 'HTTP_') === 0  ||  strpos($key, 'CONTENT_') === 0 ) {
+		$headername = str_replace( '_', ' ', str_replace('HTTP_', '', $key));
 		$headername = str_replace( ' ', '-', ucwords( strtolower( $headername ) ) );
 		if ( !in_array( $headername, array( 'Host', 'X-Proxy-Url' ) ) ) {
 			$request_headers[] = "$headername: $value";
