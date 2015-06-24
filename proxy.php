@@ -3,6 +3,7 @@
 /**
  * AJAX Cross Domain (PHP) Proxy 0.8
  *    by Iacovos Constantinou (http://www.iacons.net)
+ *    (Forked by Erlend Ellingsen)
  * 
  * Released under CC-GNU GPL
  */
@@ -28,6 +29,7 @@ define( 'CSAJAX_DEBUG', false );
 /**
  * A set of valid cross domain requests
  */
+define('VALID_REQUESTS_ENABLED', false);
 $valid_requests = array(
 	// 'example.com'
 );
@@ -92,7 +94,8 @@ if ( preg_match( '!' . $_SERVER['SCRIPT_NAME'] . '!', $request_url ) || empty( $
 if ( CSAJAX_FILTERS ) {
 	$parsed = $p_request_url;
 	if ( CSAJAX_FILTER_DOMAIN ) {
-		if ( !in_array( $parsed['host'], $valid_requests ) ) {
+
+		if (VALID_REQUESTS_ENABLED && !in_array( $parsed['host'], $valid_requests ) ) {
 			csajax_debug_message( 'Invalid domain - ' . $parsed['host'] . ' does not included in valid requests' );
 			exit;
 		}
@@ -102,10 +105,13 @@ if ( CSAJAX_FILTERS ) {
 		$check_url .= isset( $parsed['host'] ) ? $parsed['host'] : '';
 		$check_url .= isset( $parsed['port'] ) ? ':' . $parsed['port'] : '';
 		$check_url .= isset( $parsed['path'] ) ? $parsed['path'] : '';
-		if ( !in_array( $check_url, $valid_requests ) ) {
+		
+		if (VALID_REQUESTS_ENABLED && !in_array( $check_url, $valid_requests ) ) {
 			csajax_debug_message( 'Invalid domain - ' . $request_url . ' does not included in valid requests' );
 			exit;
 		}
+		
+
 	}
 }
 
