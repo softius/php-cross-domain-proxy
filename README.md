@@ -45,4 +45,6 @@ $valid_requests = array(
 );
 ```
 
+If you for some reason don't want this layer of security, you can disable it using the VALID_REQUESTS_ENABLED constant.
+
  
