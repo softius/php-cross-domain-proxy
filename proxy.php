@@ -46,10 +46,6 @@ foreach ( $_SERVER as $key => $value ) {
 	}
 }
 
-if (isset($_SERVER["CONTENT_TYPE"])) {
-	$request_headers[] = 'Content-Type: ' . $_SERVER["CONTENT_TYPE"];
-}
-
 // identify request method, url and params
 $request_method = $_SERVER['REQUEST_METHOD'];
 if ( 'GET' == $request_method ) {
