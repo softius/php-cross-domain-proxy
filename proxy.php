@@ -3,7 +3,7 @@
 /**
  * AJAX Cross Domain (PHP) Proxy 0.8
  *    by Iacovos Constantinou (http://www.iacons.net)
- * 
+ *
  * Released under CC-GNU GPL
  */
 
@@ -37,8 +37,8 @@ $valid_requests = array(
 // identify request headers
 $request_headers = array( );
 foreach ( $_SERVER as $key => $value ) {
-	if ( substr( $key, 0, 5 ) == 'HTTP_' ) {
-		$headername = str_replace( '_', ' ', substr( $key, 5 ) );
+	if ( strpos($key, 'HTTP_') === 0  ||  strpos($key, 'CONTENT_') === 0 ) {
+		$headername = str_replace( '_', ' ', str_replace('HTTP_', '', $key));
 		$headername = str_replace( ' ', '-', ucwords( strtolower( $headername ) ) );
 		if ( !in_array( $headername, array( 'Host', 'X-Proxy-Url' ) ) ) {
 			$request_headers[] = "$headername: $value";
