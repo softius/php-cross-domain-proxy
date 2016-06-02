@@ -32,6 +32,17 @@ $valid_requests = array(
     // 'example.com'
 );
 
+/**
+ * Set extra multiple options for cURL
+ * Could be used to define CURLOPT_SSL_VERIFYPEER & CURLOPT_SSL_VERIFYHOST for HTTPS
+ * Also to overwrite any other options without changing the code
+ * See http://php.net/manual/en/function.curl-setopt-array.php
+ */
+$curl_options = array(
+    // CURLOPT_SSL_VERIFYPEER => false,
+    // CURLOPT_SSL_VERIFYHOST => 2,
+);
+
 /* * * STOP EDITING HERE UNLESS YOU KNOW WHAT YOU ARE DOING * * */
 
 // identify request headers
@@ -128,6 +139,11 @@ if ('POST' == $request_method) {
 } elseif ('PUT' == $request_method || 'DELETE' == $request_method) {
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request_method);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $request_params);
+}
+
+// Set multiple options for curl according to configuration
+if (is_array($curl_options) && 0 <= count($curl_options)) {
+    curl_setopt_array($ch, $curl_options);
 }
 
 // retrieve response (headers and content)
