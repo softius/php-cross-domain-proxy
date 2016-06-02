@@ -5,6 +5,8 @@ An application proxy that can be used to transparently transfer all kind of requ
 
 If it is possible to enable CORS on your application server, this proxy is not necessary. Have a look at [how you can enable CORS on your server](http://enable-cors.org/server.html) for further information.
 
+PHP 5.3+
+
 Installation
 --------------
 
