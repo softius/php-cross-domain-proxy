@@ -29,7 +29,7 @@ define( 'CSAJAX_DEBUG', false );
 /**
  * A set of valid cross domain requests
  */
-define('VALID_REQUESTS_ENABLED', false);
+define('VALID_REQUESTS_ENABLED', true);
 $valid_requests = array(
 	// 'example.com'
 );
