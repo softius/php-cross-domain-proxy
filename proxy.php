@@ -11,25 +11,25 @@
  * Enables or disables filtering for cross domain requests.
  * Recommended value: true
  */
-define('CSAJAX_FILTERS', true);
+$ConfCSAJAX_FILTERS = true;
 
 /**
  * If set to true, $valid_requests should hold only domains i.e. a.example.com, b.example.com, usethisdomain.com
  * If set to false, $valid_requests should hold the whole URL ( without the parameters ) i.e. http://example.com/this/is/long/url/
  * Recommended value: false (for security reasons - do not forget that anyone can access your proxy)
  */
-define('CSAJAX_FILTER_DOMAIN', false);
+$ConfCSAJAX_FILTER_DOMAIN = false;
 
 /**
  * Set debugging to true to receive additional messages - really helpful on development
  */
-define('CSAJAX_DEBUG', false);
+$ConfCSAJAX_DEBUG = true;
 
 /**
- * A set of valid cross domain requests
+ * A set of valid cross domain requests, which can also beeing adressed with a key
  */
 $valid_requests = array(
-    // 'example.com'
+	//'mykey' => 'https://example.com/foo/bar'
 );
 
 /**
@@ -43,7 +43,41 @@ $curl_options = array(
     // CURLOPT_SSL_VERIFYHOST => 2,
 );
 
+/**
+ * Loading configuration file
+ */
+$xmlConfPath = "./proxy.conf.xml";
+
 /* * * STOP EDITING HERE UNLESS YOU KNOW WHAT YOU ARE DOING * * */
+$xmlConf = false;
+if(file_exists($xmlConfPath)) {
+    $xmlConf = simplexml_load_file($xmlConfPath);
+}
+
+if($xmlConf !== false) {
+    // Configuration file found and loaded, adding configuration
+    if(isset($xmlConf->debug)) {
+        $ConfCSAJAX_DEBUG = ("true" === $xmlConf->debug['enable']->__toString());
+    }
+    if(isset($xmlConf->filters)) {
+        $ConfCSAJAX_FILTERS = ("true" === $xmlConf->filters['enable']->__toString());
+        $ConfCSAJAX_FILTER_DOMAIN = ("true" === $xmlConf->filters['domains']->__toString());
+    }
+    if(isset($xmlConf->{'valid-requests'})) {
+        foreach($xmlConf->{'valid-requests'}->children() as $request) {
+            $valid_requests[$request['key']->__toString()] = $request['url']->__toString();
+        }
+    } 
+    if(isset($xmlConf->{'curl-options'})) {
+        foreach($xmlConf->{'curl-options'}->children() as $curlOpt) {
+            $curl_options[$curlOpt['key']->__toString()] = $curlOpt->__toString();
+        }
+    } 
+}
+
+define('CSAJAX_FILTERS', $ConfCSAJAX_FILTERS);
+define('CSAJAX_FILTER_DOMAIN', $ConfCSAJAX_FILTER_DOMAIN);
+define('CSAJAX_DEBUG', $ConfCSAJAX_DEBUG);
 
 // identify request headers
 $request_headers = array( );
@@ -86,7 +120,9 @@ if (isset($_REQUEST['csurl'])) {
     $_SERVER['REDIRECT_STATUS'] = 404;
     exit;
 }
-
+if(array_key_exists($request_url, $valid_requests)) {
+    $request_url = $valid_requests[$request_url];
+}
 $p_request_url = parse_url($request_url);
 
 // csurl may exist in GET request methods
@@ -96,7 +132,7 @@ if (is_array($request_params) && array_key_exists('csurl', $request_params)) {
 
 // ignore requests for proxy :)
 if (preg_match('!' . $_SERVER['SCRIPT_NAME'] . '!', $request_url) || empty($request_url) || count($p_request_url) == 1) {
-    csajax_debug_message('Invalid request - make sure that csurl variable is not empty');
+    csajax_debug_message('Invalid request: ' . $request_url . ' - make sure that csurl variable is not empty');
     exit;
 }
 
@@ -110,12 +146,12 @@ if (CSAJAX_FILTERS) {
         }
     } else {
         $check_url = isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '';
-        $check_url .= isset($parsed['user']) ? $parsed['user'] . ($parsed['pass'] ? ':' . $parsed['pass'] : '') . '@' : '';
+        $check_url .= isset($parsed['user']) ? $parsed['user'] . ($parsed['pass'] ? ':' . $parsed['pass'] : ':') . '@' : '';
         $check_url .= isset($parsed['host']) ? $parsed['host'] : '';
         $check_url .= isset($parsed['port']) ? ':' . $parsed['port'] : '';
         $check_url .= isset($parsed['path']) ? $parsed['path'] : '';
         if (!in_array($check_url, $valid_requests)) {
-            csajax_debug_message('Invalid domain - ' . $request_url . ' does not included in valid requests');
+            csajax_debug_message('Invalid domain - ' . $check_url . ' does not included in valid requests');
             exit;
         }
     }
