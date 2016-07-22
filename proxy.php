@@ -2,7 +2,7 @@
 
 /**
  * AJAX Cross Domain (PHP) Proxy 0.8
- * Coypright (C) 2016 Iacovos Constantinou (https://github.com/softius)
+ * Copyright (C) 2016 Iacovos Constantinou (https://github.com/softius)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
