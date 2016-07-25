@@ -1,0 +1,16 @@
+{
+    "name": "softius/cors-proxy",
+    "description": "PHP CORS Proxy",
+    "keywords": ["cors", "proxy"],
+    "type": "library",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Iacovos Constantinou",
+            "email": "softius@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
