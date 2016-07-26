@@ -49,4 +49,22 @@ $valid_requests = array(
 );
 ```
 
+You can also define a key to reference an URL. In this case, the `csurl` parameter must be equals to a key:
+
+``` JAVASCRIPT
+$valid_requests = array(
+	'A' => 'http://www.domainA.com/',
+	'B' => 'http://www.domainB.com/path-to-services/service-a'
+);
+```
+
+All configuration can also be configured in an external xml file. To reference the configuration file, update the `$xmlConfPath` variable:
+
+``` JAVASCRIPT
+$xmlConfPath = "./proxy.conf.xml";
+);
+```
+
+You can find example configuration in `proxy.conf.xml` file.
+
  

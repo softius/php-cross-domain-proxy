@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<csajax>
+ <debug enable="false"/>
+ <filters enable="true" domains="false"/>
+ <valid-requests>
+  <request key="mykey" url="http://example.com/to_proxy"/>
+ </valid-requests>
+ <curl-options>
+  <!--
+  <option key="CURLOPT_SSL_VERIFYPEER">false</option>
+  -->
+ </curl-options>
+</csajax>
