@@ -1,18 +1,89 @@
-PHP Cross Domain (AJAX) Proxy
-==============
+# PHP CORS Proxy
 
-An application proxy that can be used to transparently transfer all kind of requests ( including of course XMLHTTPRequest ) to any third part domain. It is possible to define a list of acceptable third party domains and you are encouraged to do so. Otherwise the proxy is open to any kind of requests.
+*Formerly known as "PHP Cross Domain (AJAX) Proxy"*
 
-If it is possible to enable CORS on your application server, this proxy is not necessary. Have a look at [how you can enable CORS on your server](http://enable-cors.org/server.html) for further information.
+A CORS proxy that allows cross domain requests. It can be used to access resources from third part websites when it's not possible to enable CORS.
 
-PHP 5.3+
+**Note**: Please check whether this solution is indeed necessary by having a look at [how you can enable CORS on your server](http://enable-cors.org/server.html).
 
-Installation
---------------
+## Overview
 
-The proxy is indentionally limited to a single file. All you have to do is to place `proxy.php` under your application
 
-Whenever you want to make a cross domain request, just make a request to http://www.yourdomain.com/proxy.php and specify the cross domain URL by using `csurl` parameter. Obviously, you can add more parameters according to your needs; note that the rest of the parameters will be used in the cross domain request. For instance, if you are using jQuery:
+### Features
+
+* Acts as a reverse proxy: request headers and data are propagated from proxy to server. Similarly, response headers and data are propagated from proxy to client.
+* Provides support for all methods GET, POST, PUT, DELETE.
+* Requests can be filtered against a list of trusted domains / URLs.
+* External configuration (Work in progress)
+* Error handling i.e. when server is not available (Work in progress)
+* Debugging mode (Work in progress)
+
+### Requirements
+
+PHP Cors Proxy works with PHP 5.3+ or above.
+
+### Author
+
+Iacovos Constantinou - softius@gmail.com
+See also the list of [contributors](https://github.com/softius/php-cross-domain-proxy/graphs/contributors) which participated in this project.
+
+
+### License
+
+PHP CORS Proxy is licensed under GPL-3.0. See `LICENCE.txt` file for further details.
+
+
+## Installation
+
+**Using composer**
+
+```
+composer require softius/cors-proxy
+```
+
+**Manual installation**
+
+The proxy is indentionally limited to a single file. All you have to do is to place `proxy.php` under the public folder of your application. 
+
+### Configuration
+
+For security reasons don't forget to define all the trusted domains / URLs into top section of `proxy.php` file:
+
+``` JAVASCRIPT
+$valid_requests = array(
+	'http://www.domainA.com/',
+	'http://www.domainB.com/path-to-services/service-a'
+);
+```
+
+**Note**: There is currently ongoing work to allow configuration outside the `proxy.php` 
+
+## Usage
+It is possible to initiate a cross domain request either by providing the `X-Proxy-URL` header or by passing a special `GET` parameter. The former method is strongly suggested since it doesn't modify the request query. Also, the request looks more clear and easier to understand.
+
+### Using headers
+
+It is possible to specify the target URL with the `X-Proxy-URL` header, which might be easier to set with your JavaScript library. For example, if you wanted to automatically use the proxy for external URL targets, for GET and POST requests:
+
+``` JAVASCRIPT
+$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+	if (options.url.match(/^https?:/)) {
+		options.headers['X-Proxy-URL'] = options.url;
+		options.url = '/proxy.php';
+	}
+});
+```
+
+The following example uses `curl`
+
+```
+curl -v -H "X-Proxy-URL: http://cross-domain.com" http://mydomain.com/proxy.php 
+```
+
+
+### Using query
+
+In order to make a cross domain request, just make a request to http://www.yourdomain.com/proxy.php and specify the target URL by using the `csurl` (GET) parameter. Obviously, you can add more parameters according to your needs; note that the rest of the parameters will be used in the cross domain request. For instance, if you are using jQuery:
 
 ``` JAVASCRIPT
 $('#target').load(
@@ -24,29 +95,9 @@ $('#target').load(
 );
 ```
 
-It’s worth mentioning that all request methods are working GET, PUT, POST, DELETE are working and headers are taken into consideration. That is to say, headers sent from browser to proxy are used in the cross domain request and vice versa.
+The following example uses `curl`
 
-You can also specify the URL with the `X-Proxy-URL` header, which might be easier to set with your JavaScript library. For example, if you wanted to automatically use the proxy for external URL targets, for GET and POST requests:
-
-``` JAVASCRIPT
-$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-	if (options.url.match(/^https?:/)) {
-		options.headers['X-Proxy-URL'] = options.url;
-		options.url = '/proxy.php';
-	}
-});
 ```
-
-Configuration
---------------
-
-For security reasons don't forget to define all the valid requests into top section of `proxy.php` file:
-
-``` JAVASCRIPT
-$valid_requests = array(
-	'http://www.domainA.com/',
-	'http://www.domainB.com/path-to-services/service-a'
-);
+curl -v http://mydomain.com/proxy.php?csurl=http://www.cross-domain.com/&param1=value1&param2=value2
 ```
-
  
