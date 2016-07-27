@@ -2,9 +2,9 @@
 
 *Formerly known as "PHP Cross Domain (AJAX) Proxy"*
 
-A CORS proxy that allows cross domain requests. It can be used to access resources from third part websites when it's not possible to enable CORS.
+PHP CORS Proxy is a simple php script that allows cross domain requests. It can be used to access resources from third party websites when it's not possible to enable CORS on target website i.e. when you don't own that website.
 
-**Note**: Please check whether this solution is indeed necessary by having a look at [how you can enable CORS on your server](http://enable-cors.org/server.html).
+**Note**: Please check whether this solution is indeed necessary by having a look on [how you can enable CORS on your server](http://enable-cors.org/server.html).
 
 ## Overview
 
@@ -13,7 +13,8 @@ A CORS proxy that allows cross domain requests. It can be used to access resourc
 
 * Acts as a reverse proxy: request headers and data are propagated from proxy to server. Similarly, response headers and data are propagated from proxy to client.
 * Provides support for all methods GET, POST, PUT, DELETE.
-* Requests can be filtered against a list of trusted domains / URLs.
+* Provides also support for HTTPS.
+* Requests can be filtered against a list of trusted domains or URLs.
 * External configuration (Work in progress)
 * Error handling i.e. when server is not available (Work in progress)
 * Debugging mode (Work in progress)
@@ -24,8 +25,8 @@ PHP Cors Proxy works with PHP 5.3+ or above.
 
 ### Author
 
-Iacovos Constantinou - softius@gmail.com
-See also the list of [contributors](https://github.com/softius/php-cross-domain-proxy/graphs/contributors) which participated in this project.
+* Iacovos Constantinou - softius@gmail.com
+* See also the list of [contributors](https://github.com/softius/php-cross-domain-proxy/graphs/contributors) which participated in this project.
 
 
 ### License
@@ -51,8 +52,8 @@ For security reasons don't forget to define all the trusted domains / URLs into 
 
 ``` JAVASCRIPT
 $valid_requests = array(
-	'http://www.domainA.com/',
-	'http://www.domainB.com/path-to-services/service-a'
+    'http://www.domainA.com/',
+    'http://www.domainB.com/path-to-services/service-a'
 );
 ```
 
@@ -63,21 +64,21 @@ It is possible to initiate a cross domain request either by providing the `X-Pro
 
 ### Using headers
 
-It is possible to specify the target URL with the `X-Proxy-URL` header, which might be easier to set with your JavaScript library. For example, if you wanted to automatically use the proxy for external URL targets, for GET and POST requests:
+It is possible to specify the target URL by using the `X-Proxy-URL` header, which might be easier to set with your JavaScript library. For example, if you wanted to automatically use the proxy for external URL targets, for GET and POST requests:
 
 ``` JAVASCRIPT
 $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-	if (options.url.match(/^https?:/)) {
-		options.headers['X-Proxy-URL'] = options.url;
-		options.url = '/proxy.php';
-	}
+    if (options.url.match(/^https?:/)) {
+        options.headers['X-Proxy-URL'] = options.url;
+        options.url = '/proxy.php';
+    }
 });
 ```
 
 The following example uses `curl`
 
 ```
-curl -v -H "X-Proxy-URL: http://cross-domain.com" http://mydomain.com/proxy.php 
+curl -v -H "X-Proxy-URL: http://cross-domain.com" http://yourdomain.com/proxy.php
 ```
 
 
@@ -87,17 +88,16 @@ In order to make a cross domain request, just make a request to http://www.yourd
 
 ``` JAVASCRIPT
 $('#target').load(
-	'http://www.yourdomain.com/proxy.php', {
-		csurl: 'http://www.cross-domain.com/',
-		param1: value1, 
-		param2: value2
-	}
+    'http://www.yourdomain.com/proxy.php', {
+        csurl: 'http://www.cross-domain.com/',
+        param1: value1,
+        param2: value2
+    }
 );
 ```
 
 The following example uses `curl`
 
 ```
-curl -v http://mydomain.com/proxy.php?csurl=http://www.cross-domain.com/&param1=value1&param2=value2
+curl -v http://yourdomain.com/proxy.php?csurl=http://www.cross-domain.com/&param1=value1&param2=value2
 ```
- 
