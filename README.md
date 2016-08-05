@@ -99,5 +99,5 @@ $('#target').load(
 The following example uses `curl`
 
 ```
-curl -v http://yourdomain.com/proxy.php?csurl=http://www.cross-domain.com/&param1=value1&param2=value2
+curl -v "http://yourdomain.com/proxy.php?csurl=http://www.cross-domain.com/&param1=value1&param2=value2"
 ```
