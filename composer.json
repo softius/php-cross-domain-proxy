@@ -1,16 +1,32 @@
 {
     "name": "softius/cors-proxy",
-    "description": "PHP CORS Proxy",
-    "keywords": ["cors", "proxy"],
     "type": "library",
+    "description": "PHP CORS Proxy",
+    "keywords": [
+        "softius",
+        "cors-proxy",
+        "cors",
+        "proxy"
+    ],
+    "homepage": "https://github.com/softius/php-cross-domain-proxy",
     "license": "GPL-3.0",
     "authors": [
         {
             "name": "Iacovos Constantinou",
-            "email": "softius@gmail.com"
+            "email": "softius@gmail.com",
+            "homepage": "https://github.com/softius",
+            "role": "Developer"
         }
     ],
     "require": {
         "php": ">=5.3.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
