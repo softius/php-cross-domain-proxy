@@ -1,5 +1,8 @@
 # PHP CORS Proxy
 
+[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Total Downloads][ico-downloads]][link-downloads]
+
 *Formerly known as "PHP Cross Domain (AJAX) Proxy"*
 
 PHP CORS Proxy is a simple php script that allows cross domain requests. It can be used to access resources from third party websites when it's not possible to enable CORS on target website i.e. when you don't own that website.
@@ -25,8 +28,8 @@ PHP Cors Proxy works with PHP 5.3+ or above.
 
 ### Author
 
-* Iacovos Constantinou - softius@gmail.com
-* See also the list of [contributors](https://github.com/softius/php-cross-domain-proxy/graphs/contributors) which participated in this project.
+- [Iacovos Constantinou][link-author]  - softius@gmail.com - https://twitter.com/iacons
+- See also the list of [contributors][link-contributors] which participated in this project.
 
 
 ### License
@@ -101,3 +104,11 @@ The following example uses `curl`
 ```
 curl -v "http://yourdomain.com/proxy.php?csurl=http://www.cross-domain.com/&param1=value1&param2=value2"
 ```
+
+[ico-version]: https://img.shields.io/packagist/v/softius/cors-proxy.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/softius/cors-proxy.svg?style=flat-square
+
+[link-packagist]: https://packagist.org/packages/softius/cors-proxy
+[link-downloads]: https://packagist.org/packages/softius/cors-proxy
+[link-author]: https://github.com/softius
+[link-contributors]: ../../contributors
