@@ -56,13 +56,10 @@ $curl_options = array(
 
 // identify request headers
 $request_headers = array( );
-foreach ($_SERVER as $key => $value) {
-    if (strpos($key, 'HTTP_') === 0  ||  strpos($key, 'CONTENT_') === 0) {
-        $headername = str_replace('_', ' ', str_replace('HTTP_', '', $key));
-        $headername = str_replace(' ', '-', ucwords(strtolower($headername)));
-        if (!in_array($headername, array( 'Host', 'X-Proxy-Url' ))) {
-            $request_headers[] = "$headername: $value";
-        }
+foreach (getallheaders() as $key => $value) {
+    $headername = ucwords($key);
+    if (!in_array($headername, array( 'Host', 'X-Proxy-URL' ))) {
+        $request_headers[] = "$headername: $value";
     }
 }
 
@@ -86,9 +83,9 @@ if ('GET' == $request_method) {
 
 // Get URL from `csurl` in GET or POST data, before falling back to X-Proxy-URL header.
 if (isset($_REQUEST['csurl'])) {
-    $request_url = urldecode($_REQUEST['csurl']);
+    $request_url = $_REQUEST['csurl'];
 } elseif (isset($_SERVER['HTTP_X_PROXY_URL'])) {
-    $request_url = urldecode($_SERVER['HTTP_X_PROXY_URL']);
+    $request_url = $_SERVER['HTTP_X_PROXY_URL'];
 } else {
     header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
     header('Status: 404 Not Found');
@@ -134,7 +131,6 @@ if (CSAJAX_FILTERS) {
 if ($request_method == 'GET' && count($request_params) > 0 && (!array_key_exists('query', $p_request_url) || empty($p_request_url['query']))) {
     $request_url .= '?' . http_build_query($request_params);
 }
-
 // let the request begin
 $ch = curl_init($request_url);
 curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);   // (re-)send headers
@@ -157,26 +153,36 @@ if (is_array($curl_options) && 0 <= count($curl_options)) {
 
 // retrieve response (headers and content)
 $response = curl_exec($ch);
+
+if ($response === false) {
+    header('Content-Type: text/plain');
+    print 'Curl error: ' . curl_error($ch);
+}
+
 curl_close($ch);
 
 // split response to header and content
-list($response_headers, $response_content) = preg_split('/(\r\n){2}/', $response, 2);
+$split_response = preg_split('/(\r\n){2}/', $response, 2);
 
-// (re-)send the headers
-$response_headers = preg_split('/(\r\n){1}/', $response_headers);
-foreach ($response_headers as $key => $response_header) {
-    // Rewrite the `Location` header, so clients will also use the proxy for redirects.
-    if (preg_match('/^Location:/', $response_header)) {
-        list($header, $value) = preg_split('/: /', $response_header, 2);
-        $response_header = 'Location: ' . $_SERVER['REQUEST_URI'] . '?csurl=' . $value;
+if (sizeof($split_response) == 2) {
+    $response_headers = preg_split('/(\r\n){1}/', $split_response[0]);
+    $response_content = $split_response[1];
+
+    // (re-)send the headers
+    foreach ($response_headers as $key => $response_header) {
+        // Rewrite the `Location` header, so clients will also use the proxy for redirects.
+        if (preg_match('/^Location:/', $response_header)) {
+            list($header, $value) = preg_split('/: /', $response_header, 2);
+            $response_header = 'Location: ' . $_SERVER['REQUEST_URI'] . '?csurl=' . $value;
+        }
+        if (!preg_match('/^(Transfer-Encoding):/', $response_header)) {
+            header($response_header, false);
+        }
     }
-    if (!preg_match('/^(Transfer-Encoding):/', $response_header)) {
-        header($response_header, false);
-    }
+
+    // finally, output the content
+    print($response_content);
 }
-
-// finally, output the content
-print($response_content);
 
 function csajax_debug_message($message)
 {
