@@ -90,10 +90,7 @@ if (isset($_REQUEST['csurl'])) {
 } elseif (isset($_SERVER['HTTP_X_PROXY_URL'])) {
     $request_url = urldecode($_SERVER['HTTP_X_PROXY_URL']);
 } else {
-    header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
-    header('Status: 404 Not Found');
-    $_SERVER['REDIRECT_STATUS'] = 404;
-    exit;
+    csajax_exit_error(404, 'Not Found');
 }
 
 $p_request_url = parse_url($request_url);
@@ -106,7 +103,7 @@ if (is_array($request_params) && array_key_exists('csurl', $request_params)) {
 // ignore requests for proxy :)
 if (preg_match('!' . $_SERVER['SCRIPT_NAME'] . '!', $request_url) || empty($request_url) || count($p_request_url) == 1) {
     csajax_debug_message('Invalid request - make sure that csurl variable is not empty');
-    exit;
+    csajax_exit_error(403, 'Forbidden');
 }
 
 // check against valid requests
@@ -115,7 +112,7 @@ if (CSAJAX_FILTERS) {
     if (CSAJAX_FILTER_DOMAIN) {
         if (!in_array($parsed['host'], $valid_requests)) {
             csajax_debug_message('Invalid domain - ' . $parsed['host'] . ' does not included in valid requests');
-            exit;
+            csajax_exit_error(403, 'Forbidden');
         }
     } else {
         $check_url = isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '';
@@ -125,7 +122,7 @@ if (CSAJAX_FILTERS) {
         $check_url .= isset($parsed['path']) ? $parsed['path'] : '';
         if (!in_array($check_url, $valid_requests)) {
             csajax_debug_message('Invalid domain - ' . $request_url . ' does not included in valid requests');
-            exit;
+            csajax_exit_error(403, 'Forbidden');
         }
     }
 }
@@ -157,6 +154,17 @@ if (is_array($curl_options) && 0 <= count($curl_options)) {
 
 // retrieve response (headers and content)
 $response = curl_exec($ch);
+// error management
+if (false === $response) {
+    $errno = curl_errno($ch);
+    $message = curl_error($ch);
+    curl_close($ch);
+    if ($errno == 7) {
+        csajax_exit_error(408, 'Request Time-out');
+    } else {
+        csajax_exit_error(500, 'Server Error', $message);
+    }
+}
 curl_close($ch);
 
 // split response to header and content
@@ -177,6 +185,17 @@ foreach ($response_headers as $key => $response_header) {
 
 // finally, output the content
 print($response_content);
+
+function csajax_exit_error($error_code, $error_text, $message = '')
+{
+    header($_SERVER['SERVER_PROTOCOL'] . " $error_code $error_text");
+    header("Status: $error_code $error_text");
+    $_SERVER['REDIRECT_STATUS'] = $error_code;
+    if (!empty($message)) {
+        print($message);
+    }
+    exit($error_code);
+}
 
 function csajax_debug_message($message)
 {
