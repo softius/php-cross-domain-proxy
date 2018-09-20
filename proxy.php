@@ -137,6 +137,7 @@ if ($request_method == 'GET' && count($request_params) > 0 && (!array_key_exists
 
 // let the request begin
 $ch = curl_init($request_url);
+array_push($request_headers, 'Expect:'); // Many hosts don't support 100-Expect
 curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);   // (re-)send headers
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);     // return response
 curl_setopt($ch, CURLOPT_HEADER, true);       // enabled response headers
