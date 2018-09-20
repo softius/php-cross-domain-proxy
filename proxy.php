@@ -57,7 +57,7 @@ $curl_options = array(
 // identify request headers
 $request_headers = array( );
 foreach ($_SERVER as $key => $value) {
-    if (strpos($key, 'HTTP_') === 0  ||  strpos($key, 'CONTENT_') === 0) {
+    if (strpos($key, 'HTTP_') === 0 ) {
         $headername = str_replace('_', ' ', str_replace('HTTP_', '', $key));
         $headername = str_replace(' ', '-', ucwords(strtolower($headername)));
         if (!in_array($headername, array( 'Host', 'X-Proxy-Url' ))) {
