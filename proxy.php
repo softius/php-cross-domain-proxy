@@ -30,6 +30,13 @@ define('CSAJAX_FILTERS', true);
 define('CSAJAX_FILTER_DOMAIN', false);
 
 /**
+ * Enables or disables Expect: 100-continue header. Some webservers don't 
+ * handle this header correctly.
+ * Recommended value: false
+ */
+define('CSAJAX_SUPPRESS_EXPECT', false);
+
+/**
  * Set debugging to true to receive additional messages - really helpful on development
  */
 define('CSAJAX_DEBUG', false);
@@ -137,6 +144,12 @@ if ($request_method == 'GET' && count($request_params) > 0 && (!array_key_exists
 
 // let the request begin
 $ch = curl_init($request_url);
+
+// Suppress Expect header
+if (CSAJAX_SUPPRESS_EXPECT) {
+    array_push($request_headers, 'Expect:'); 
+}
+
 curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);   // (re-)send headers
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);     // return response
 curl_setopt($ch, CURLOPT_HEADER, true);       // enabled response headers
