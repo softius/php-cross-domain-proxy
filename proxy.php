@@ -181,7 +181,7 @@ foreach ($response_headers as $key => $response_header) {
     // Rewrite the `Location` header, so clients will also use the proxy for redirects.
     if (preg_match('/^Location:/', $response_header)) {
         list($header, $value) = preg_split('/: /', $response_header, 2);
-        $response_header = 'Location: ' . $_SERVER['REQUEST_URI'] . '?csurl=' . $value;
+        $response_header = 'Location: ' . preg_replace('/\?csurl=.*/', '?csurl='.urlencode($value), $_SERVER['REQUEST_URI']);
     }
     if (!preg_match('/^(Transfer-Encoding):/', $response_header)) {
         header($response_header, false);
