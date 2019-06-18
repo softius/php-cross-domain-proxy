@@ -30,6 +30,13 @@ define('CSAJAX_FILTERS', true);
 define('CSAJAX_FILTER_DOMAIN', false);
 
 /**
+ * If set to true, $valid_requests will be compared as regular expressions
+ * If set to false, $valid_requests will be compared as exact strings
+ * Recommended value: false (for security reasons, why use it if your don't need it)
+ */
+define('CSAJAX_FILTER_REGEXP', false);
+
+/**
  * Enables or disables Expect: 100-continue header. Some webservers don't 
  * handle this header correctly.
  * Recommended value: false
@@ -120,9 +127,16 @@ if (preg_match('!' . $_SERVER['SCRIPT_NAME'] . '!', $request_url) || empty($requ
 if (CSAJAX_FILTERS) {
     $parsed = $p_request_url;
     if (CSAJAX_FILTER_DOMAIN) {
-        if (!in_array($parsed['host'], $valid_requests)) {
-            csajax_debug_message('Invalid domain - ' . $parsed['host'] . ' does not included in valid requests');
-            exit;
+        if (CSAJAX_FILTER_REGEXP) {
+            if (1 !== csajax_preg_match_pattern_array($valid_requests, $parsed['host'])) {
+                csajax_debug_message('Invalid domain - ' . $parsed['host'] . ' is not matched by valid requests');
+                exit;
+            }
+        } else {
+            if (!in_array($parsed['host'], $valid_requests)) {
+                csajax_debug_message('Invalid domain - ' . $parsed['host'] . ' is not included in valid requests');
+                exit;
+            }
         }
     } else {
         $check_url = isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '';
@@ -130,9 +144,16 @@ if (CSAJAX_FILTERS) {
         $check_url .= isset($parsed['host']) ? $parsed['host'] : '';
         $check_url .= isset($parsed['port']) ? ':' . $parsed['port'] : '';
         $check_url .= isset($parsed['path']) ? $parsed['path'] : '';
-        if (!in_array($check_url, $valid_requests)) {
-            csajax_debug_message('Invalid domain - ' . $request_url . ' does not included in valid requests');
-            exit;
+        if (CSAJAX_FILTER_REGEXP) {
+            if (1 !== csajax_preg_match_pattern_array($valid_requests, $check_url)) {
+                csajax_debug_message('Invalid domain - ' . $request_url . ' is not matched by valid requests');
+                exit;
+            }
+        } else {
+            if (!in_array($check_url, $valid_requests)) {
+                csajax_debug_message('Invalid domain - ' . $request_url . ' is not included in valid requests');
+                exit;
+            }
         }
     }
 }
@@ -196,4 +217,18 @@ function csajax_debug_message($message)
     if (true == CSAJAX_DEBUG) {
         print $message . PHP_EOL;
     }
+}
+
+function csajax_preg_match_pattern_array($pattern_array, $subject)
+{
+    foreach ($pattern_array as $pattern) {
+        $match_result = preg_match($pattern, $subject);
+        if (1 === $match_result) {
+            return 1;
+        } elseif (false === $match_result) {
+            csajax_debug_message('Invalid preg_match pattern - ' . $pattern);
+            return false;
+        }
+    }
+    return 0;
 }
