@@ -17,6 +17,12 @@
  */
 
 /**
+ * Enables or disables checking that HTTP_REFERRER and HTTP_HOST have the same hostname.
+ * Recommended value: false for public CORS proxy, true for private CORS proxy
+ */
+define('CSAJAX_SAME_ORIGIN_ONLY', false);
+
+/**
  * Enables or disables filtering for cross domain requests.
  * Recommended value: true
  */
@@ -60,6 +66,24 @@ $curl_options = array(
 );
 
 /* * * STOP EDITING HERE UNLESS YOU KNOW WHAT YOU ARE DOING * * */
+
+// check for same origin
+if (CSAJAX_SAME_ORIGIN_ONLY) {
+    if (isset($_SERVER['HTTP_REFERER']) && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_SCHEME'])) {
+        $p_referrer_url = parse_url($_SERVER['HTTP_REFERER']);
+        if ($p_referrer_url['host'] != $_SERVER['HTTP_HOST']) {
+            csajax_debug_message('Referrer hostname is not same origin');
+            exit;
+        }
+        if ($p_referrer_url['scheme'] != $_SERVER['REQUEST_SCHEME']) {
+            csajax_debug_message('Referrer hostname is same origin, not same scheme');
+            exit;
+        }
+    } else {
+        csajax_debug_message('Cannot verify same origin without HTTP_REFERER, HTTP_HOST, REQUEST_SCHEME');
+        exit;
+    }
+}
 
 // identify request headers
 $request_headers = array( );
