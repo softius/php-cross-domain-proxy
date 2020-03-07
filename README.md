@@ -47,7 +47,7 @@ composer require softius/cors-proxy
 
 **Manual installation**
 
-The proxy is indentionally limited to a single file. All you have to do is to place `proxy.php` under the public folder of your application. 
+The proxy is intentionally limited to a single file. All you have to do is to place `proxy.php` under the public folder of your application. 
 
 ### Configuration
 
