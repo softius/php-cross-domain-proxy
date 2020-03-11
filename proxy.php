@@ -45,6 +45,8 @@ define('CSAJAX_DEBUG', false);
  * A set of valid cross domain requests
  */
 $valid_requests = array(
+    'localhost:3000',
+    'www.google.com'
     // 'example.com'
 );
 
